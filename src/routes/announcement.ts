@@ -3,14 +3,14 @@ import { Hono } from 'hono'
 import { isValidObjectId } from 'mongoose'
 import { Announcement } from '../models/announcement'
 
-const api = new Hono().basePath('/announcements')
+const announcements = new Hono().basePath('/announcements')
 
-api.get('/', async (c) => {
+announcements.get('/', async (c) => {
     const announcement = await Announcement.find({})
     return c.json(announcement)
 })
 
-api.get('/:id', async (c) => {
+announcements.get('/:id', async (c) => {
     const _id = c.req.param('id')
 
     if (isValidObjectId(_id)) {
@@ -20,7 +20,7 @@ api.get('/:id', async (c) => {
     return c.json({ msg: 'ObjectId malformed' }, 400)
 })
 
-api.post('/', async (c) => {
+announcements.post('/', async (c) => {
     const body = await c.req.json()
     try {
         const newAnnouncement = new Announcement(body)
@@ -32,7 +32,7 @@ api.post('/', async (c) => {
 })
 
 // en put, on écrase toutes les valeurs (y compris les tableaux)
-api.put('/:id', async (c) => {
+announcements.put('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
     // on attrape l'id de la creations (_id)
@@ -51,7 +51,7 @@ api.put('/:id', async (c) => {
 
 })
 // en patch, on va "append" les éléments passés dans le body
-api.patch('/:id', async (c) => {
+announcements.patch('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
     // on attrape l'id de la creations (_id)
@@ -60,20 +60,23 @@ api.patch('/:id', async (c) => {
     const q = {
         _id
     }
-    const { categories, ...rest } = body
+    const { title, description, picture, skills, is_activate } = body;
 
     const updateQuery = {
-        $addToSet: {
-            categories: categories
-        },
-        $set: { ...rest }
-    }
+        $set: {
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
+            ...(picture !== undefined && { picture }),
+            ...(skills !== undefined && { skills }),
+            ...(is_activate !== undefined && { is_activate })
+        }
+    };
+
     const tryToUpdate = await Announcement.findOneAndUpdate(q, updateQuery, { new: true })
     return c.json(tryToUpdate, 200)
-
 })
 
-api.delete('/:id', async (c) => {
+announcements.delete('/:id', async (c) => {
     const _id = c.req.param('id')
     const tryToDelete = await Announcement.deleteOne({ _id })
     const { deletedCount } = tryToDelete
@@ -84,4 +87,4 @@ api.delete('/:id', async (c) => {
 
 })
 
-export default api
+export default announcements

@@ -3,14 +3,14 @@ import { Hono } from 'hono'
 import { isValidObjectId } from 'mongoose'
 import { User } from '../models/user'
 
-const api = new Hono().basePath('/user')
+const users = new Hono().basePath('/users')
 
-api.get('/', async (c) => {
+users.get('/', async (c) => {
     const user = await User.find({})
     return c.json(user)
 })
 
-api.get('/:id', async (c) => {
+users.get('/:id', async (c) => {
     const _id = c.req.param('id')
 
     if (isValidObjectId(_id)) {
@@ -20,7 +20,7 @@ api.get('/:id', async (c) => {
     return c.json({ msg: 'ObjectId malformed' }, 400)
 })
 
-api.post('/', async (c) => {
+users.post('/', async (c) => {
     const body = await c.req.json()
     try {
         const newUser = new User(body)
@@ -32,7 +32,7 @@ api.post('/', async (c) => {
 })
 
 // en put, on écrase toutes les valeurs (y compris les tableaux)
-api.put('/:id', async (c) => {
+users.put('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
     // on attrape l'id de la creations (_id)
@@ -51,7 +51,7 @@ api.put('/:id', async (c) => {
 
 })
 // en patch, on va "append" les éléments passés dans le body
-api.patch('/:id', async (c) => {
+users.patch('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
     // on attrape l'id de la creations (_id)
@@ -60,20 +60,28 @@ api.patch('/:id', async (c) => {
     const q = {
         _id
     }
-    const { categories, ...rest } = body
+    const { name, email, phoneNumber, place, password, profile_picture, grade, credits, description, languages } = body;
 
     const updateQuery = {
-        $addToSet: {
-            categories: categories
-        },
-        $set: { ...rest }
-    }
+        $set: {
+            ...(name !== undefined && { name }),
+            ...(email !== undefined && { email }),
+            ...(phoneNumber !== undefined && { phoneNumber }),
+            ...(place !== undefined && { place }),
+            ...(password !== undefined && { password }),
+            ...(profile_picture !== undefined && { profile_picture }),
+            ...(grade !== undefined && { grade }),
+            ...(credits !== undefined && { credits }),
+            ...(description !== undefined && { description }),
+            ...(languages !== undefined && { languages })
+        }
+    };
     const tryToUpdate = await User.findOneAndUpdate(q, updateQuery, { new: true })
     return c.json(tryToUpdate, 200)
 
 })
 
-api.delete('/:id', async (c) => {
+users.delete('/:id', async (c) => {
     const _id = c.req.param('id')
     const tryToDelete = await User.deleteOne({ _id })
     const { deletedCount } = tryToDelete
@@ -84,4 +92,4 @@ api.delete('/:id', async (c) => {
 
 })
 
-export default api
+export default users

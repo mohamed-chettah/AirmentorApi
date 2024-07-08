@@ -1,16 +1,16 @@
 import { Hono } from 'hono'
 
-import { isValidObjectId } from 'mongoose'
+import { Types, isValidObjectId } from 'mongoose'
 import { Review } from '../models/review'
 
-const api = new Hono().basePath('/user')
+const reviews = new Hono().basePath('/reviews')
 
-api.get('/', async (c) => {
+reviews.get('/', async (c) => {
     const review = await Review.find({})
     return c.json(review)
 })
 
-api.get('/:id', async (c) => {
+reviews.get('/:id', async (c) => {
     const _id = c.req.param('id')
 
     if (isValidObjectId(_id)) {
@@ -20,7 +20,7 @@ api.get('/:id', async (c) => {
     return c.json({ msg: 'ObjectId malformed' }, 400)
 })
 
-api.post('/', async (c) => {
+reviews.post('/', async (c) => {
     const body = await c.req.json()
     try {
         const newReview = new Review(body)
@@ -32,7 +32,7 @@ api.post('/', async (c) => {
 })
 
 // en put, on écrase toutes les valeurs (y compris les tableaux)
-api.put('/:id', async (c) => {
+reviews.put('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
     // on attrape l'id de la creations (_id)
@@ -51,7 +51,7 @@ api.put('/:id', async (c) => {
 
 })
 // en patch, on va "append" les éléments passés dans le body
-api.patch('/:id', async (c) => {
+reviews.patch('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
     // on attrape l'id de la creations (_id)
@@ -60,20 +60,23 @@ api.patch('/:id', async (c) => {
     const q = {
         _id
     }
-    const { categories, ...rest } = body
+    const { grade, description, reviewer, reviewed } = body;
 
     const updateQuery = {
-        $addToSet: {
-            categories: categories
-        },
-        $set: { ...rest }
-    }
+        $set: {
+            ...(grade !== undefined && { grade }),
+            ...(description !== undefined && { description }),
+            ...(reviewer !== undefined && { reviewer: new Types.ObjectId(reviewer) }),
+            ...(reviewed !== undefined && { reviewed: new Types.ObjectId(reviewed) })
+        }
+    };
+
     const tryToUpdate = await Review.findOneAndUpdate(q, updateQuery, { new: true })
     return c.json(tryToUpdate, 200)
 
 })
 
-api.delete('/:id', async (c) => {
+reviews.delete('/:id', async (c) => {
     const _id = c.req.param('id')
     const tryToDelete = await Review.deleteOne({ _id })
     const { deletedCount } = tryToDelete
@@ -84,4 +87,4 @@ api.delete('/:id', async (c) => {
 
 })
 
-export default api
+export default reviews
