@@ -16,5 +16,5 @@ const AnnouncementSchema = new Schema<IAnnouncement>({
    is_activate: {type: Boolean, required: true} 
 });
 
-const Announcement = model<IAnnouncement>('flippers', AnnouncementSchema);
+const Announcement = model<IAnnouncement>('announcement', AnnouncementSchema);
 export { Announcement, IAnnouncement }

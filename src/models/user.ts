@@ -26,5 +26,5 @@ const UserSchema = new Schema<IUser>({
     languages: { type: [String], required: true },
 });
 
-const User = model<IUser>('flippers', UserSchema);
+const User = model<IUser>('user', UserSchema);
 export { User, IUser }
