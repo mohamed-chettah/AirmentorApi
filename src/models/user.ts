@@ -11,6 +11,7 @@ interface IUser {
     credits: number;
     description: string;
     languages: string[];
+    googleId: string;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -24,6 +25,7 @@ const UserSchema = new Schema<IUser>({
     credits: { type: Number, required: true },
     description: { type: String, required: true },
     languages: { type: [String], required: true },
+    googleId: {type: String, required: true},
 });
 
 const User = model<IUser>('user', UserSchema);
