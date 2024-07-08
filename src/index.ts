@@ -1,16 +1,16 @@
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { createDatabaseConnection } from "./database";
+import { appConfiguration } from "./env/env";
 
-const app = new Hono()
+const PORT = parseInt(appConfiguration.SERVER_PORT) || 3000;
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const app = new Hono();
+await createDatabaseConnection();
 
-const port = 3000
-console.log(`Server is running on port ${port}`)
+console.log(`Server is running on port ${PORT}`);
 
 serve({
   fetch: app.fetch,
-  port
-})
+  port: PORT,
+});
