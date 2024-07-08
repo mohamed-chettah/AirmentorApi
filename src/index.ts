@@ -1,21 +1,27 @@
 import { serve } from "@hono/node-server";
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 import { createDatabaseConnection } from "./database";
 import { appConfiguration } from "./env/env";
 import announcements from "./routes/announcement";
-import users from "./routes/user";
+import auth from "./routes/auth";
 import reviews from "./routes/review";
+import users from "./routes/user";
 
-const PORT = parseInt(appConfiguration.SERVER_PORT) || 3000;
+const PORT = appConfiguration.SERVER_PORT;
+const BASE_ROUTE = appConfiguration.BASE_ROUTE;
 
 const app = new Hono();
 await createDatabaseConnection();
-app.route('/api', announcements);
-app.route('/api', users);
-app.route('/api', reviews);
+app.route("/api", announcements);
+app.route("/api", users);
+app.route("/api", reviews);
 
+app.get("/api/healthz", (c: Context) => {
+  return c.text("OK");
+});
 
-console.log(`Server is running on port ${PORT}`);
+// set routes
+app.route(BASE_ROUTE, auth);
 
 serve({
   fetch: app.fetch,
