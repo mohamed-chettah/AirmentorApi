@@ -6,7 +6,7 @@ import { Announcement } from '../models/announcement'
 const announcements = new Hono().basePath('/announcements')
 
 announcements.get('/', async (c) => {
-    const announcement = await Announcement.find({})
+    const announcement = await Announcement.find({}, {}, { populate: 'skills' })
     return c.json(announcement)
 })
 
@@ -27,6 +27,7 @@ announcements.post('/', async (c) => {
         const saveAnnouncement = await newAnnouncement.save()
         return c.json(saveAnnouncement, 201)
     } catch (error: unknown) {
+        // @ts-ignore
         return c.json(error._message, 400)
     }
 })
