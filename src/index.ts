@@ -56,8 +56,8 @@ app.use(
   })
 );
 
-// make app use the authMiddleware except for route /auth/google
-app.use(BASE_ROUTE, authMiddleware);
+// AUTH MIDDLWARE
+app.use(BASE_ROUTE + "/*", authMiddleware);
 
 await createDatabaseConnection();
 
@@ -67,12 +67,11 @@ app.route(BASE_ROUTE, users);
 app.route(BASE_ROUTE, reviews);
 app.route(BASE_ROUTE, skills);
 app.route(BASE_ROUTE, categories);
+app.route("/", auth);
 
 app.get("/api/healthz", (c: Context) => {
   return c.text("OK");
 });
-
-app.route(BASE_ROUTE, auth);
 
 // Error handling middleware
 app.onError((err, c) => {

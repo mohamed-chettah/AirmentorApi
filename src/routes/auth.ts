@@ -52,8 +52,7 @@ app.get("/google", (c: Context) => {
 });
 
 app.get("/google/callback", async (c: Context) => {
-  //randomuser.me/api/port
-  https: console.log("> Handling Google OAuth callback");
+  console.log("> Handling Google OAuth callback");
   const code = c.req.query("code");
 
   if (!code) {
