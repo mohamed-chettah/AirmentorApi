@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import { ENUMRole } from "../enum/role";
 
+
 interface IUser {
   name: string;
   email: string;
