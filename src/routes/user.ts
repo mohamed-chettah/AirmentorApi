@@ -27,6 +27,7 @@ users.post('/', async (c) => {
         const saveUser = await newUser.save()
         return c.json(saveUser, 201)
     } catch (error: unknown) {
+        // @ts-ignore
         return c.json(error._message, 400)
     }
 })
