@@ -35,6 +35,8 @@ const authMiddleware = async (c: Context, next: Next) => {
   try {
     console.log("> Verifying validity of token");
     const payload = verify(token, appConfiguration.JWT_SECRET);
+    console.log("> Token is valid");
+
     c.set("jwtPayload", payload);
     await next();
   } catch (error) {
@@ -56,8 +58,9 @@ app.use(
   })
 );
 
-// AUTH MIDDLWARE
-app.use(BASE_ROUTE + "/*", authMiddleware);
+// AUTH MIDDLWARE TODO: handle routes and methods
+// app.use(BASE_ROUTE + "/*", authMiddleware);
+// app.use(BASE_ROUTE + "/categories", authMiddleware);
 
 await createDatabaseConnection();
 
