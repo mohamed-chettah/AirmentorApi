@@ -12,6 +12,7 @@ interface IUser {
     description: string;
     languages: string[];
     googleId: string;
+    role: ENUMRole;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -26,7 +27,11 @@ const UserSchema = new Schema<IUser>({
     description: { type: String, required: true },
     languages: { type: [String], required: true },
     googleId: {type: String, required: true},
-});
+    role: { type: String, enum: Object.values(ENUMRole), required: true }, // Définir l'enum pour le schéma
+
+    }
+);
+    
 
 const User = model<IUser>('user', UserSchema);
 export { User, IUser }
