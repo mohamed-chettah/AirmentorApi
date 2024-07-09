@@ -9,6 +9,7 @@ const verify: typeof verifyType = jsonwebtoken.default.verify;
 
 import { getCookie, setCookie } from "hono/cookie";
 import { appConfiguration } from "../env/env";
+import { User } from "../models/user";
 
 const app = new Hono().basePath("/auth");
 
@@ -51,7 +52,8 @@ app.get("/google", (c: Context) => {
 });
 
 app.get("/google/callback", async (c: Context) => {
-  console.log("> Handling Google OAuth callback");
+  //randomuser.me/api/port
+  https: console.log("> Handling Google OAuth callback");
   const code = c.req.query("code");
 
   if (!code) {
@@ -81,10 +83,17 @@ app.get("/google/callback", async (c: Context) => {
 
     console.info(`> User authenticated: ${name} (${email})`);
 
-    // TODO: check if user exists in MongoDB
-    // save user to MongoDB
+    const userExists = await User.findOne({ googleId });
 
-    const token = sign({ googleId, email, name, picture }, appConfiguration.JWT_SECRET, { expiresIn: "7d" });
+    if (userExists) {
+      console.log("> User already exists in MongoDB");
+    } else {
+      console.log("> Creating new user in MongoDB");
+      const newUser = new User({ googleId, email, name, profile_picture: picture });
+      await newUser.save();
+    }
+
+    const token = sign({ googleId, name }, appConfiguration.JWT_SECRET, { expiresIn: "7d" });
 
     setCookie(c, "auth_token", token, {
       httpOnly: true,
@@ -98,6 +107,12 @@ app.get("/google/callback", async (c: Context) => {
     console.error("Error during authentication:", error);
     return c.json({ error: "Error during authentication" }, 500);
   }
+});
+
+app.get("/check", authMiddleware, (c: Context) => {
+  console.log("> Checking token validity");
+  const token = c.get("jwtPayload");
+  return c.json({ valid: true, user: token });
 });
 
 app.get("/dashboard", authMiddleware, (c: Context) => {

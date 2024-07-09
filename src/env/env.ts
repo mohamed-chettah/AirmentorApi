@@ -4,6 +4,7 @@ dotenv.config();
 interface Env {
   SERVER_PORT: number;
   BASE_ROUTE: string;
+  APP_URL: string;
 
   MONGODB_CLUSTER: string;
   MONGODB_USER: string;
@@ -21,6 +22,7 @@ export const appConfiguration: Env = {
   MONGODB_USER: process.env.MONGODB_USER || "",
   MONGODB_PWD: process.env.MONGODB_PWD || "",
   MONGODB_DATABASE: process.env.MONGODB_DATABASE || "",
+  APP_URL: process.env.APP_URL || "",
   SERVER_PORT: parseInt(process.env.PORT || "3001"),
   BASE_ROUTE: process.env.BASE_ROUTE || "",
   JWT_SECRET: process.env.JWT_SECRET || "",
