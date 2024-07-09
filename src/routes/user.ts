@@ -10,14 +10,12 @@ users.get('/', async (c) => {
     return c.json(user)
 })
 
-users.get('/:id', async (c) => {
-    const _id = c.req.param('id')
+users.get('/:googleId', async (c) => {
+    const googleId = c.req.param('googleId')
 
-    if (isValidObjectId(_id)) {
-        const user = await User.findOne({ _id })
+    
+        const user = await User.findOne({ googleId })
         return c.json(user)
-    }
-    return c.json({ msg: 'ObjectId malformed' }, 400)
 })
 
 users.post('/', async (c) => {

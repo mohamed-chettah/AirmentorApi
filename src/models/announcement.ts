@@ -1,4 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
+import { IUser } from './user';
 
 interface IAnnouncement{
    title: string;
@@ -7,6 +8,7 @@ interface IAnnouncement{
    skills: Types.ObjectId[];
    is_activate: boolean;
    review: Types.ObjectId[];
+   createdBy: IUser;
 }
 
 const AnnouncementSchema = new Schema<IAnnouncement>({
@@ -16,6 +18,7 @@ const AnnouncementSchema = new Schema<IAnnouncement>({
    skills: [{ type: Types.ObjectId, ref: 'skill' }],
    is_activate: {type: Boolean, required: true},
     review: [{ type: Types.ObjectId, ref: 'review' }],
+   createdBy: { type: Types.ObjectId, ref: 'user' },
 });
 
 const Announcement = model<IAnnouncement>('announcement', AnnouncementSchema);
