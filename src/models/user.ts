@@ -1,5 +1,11 @@
 import { Schema, model, Types } from 'mongoose';
 
+enum ENUMRole {
+    ADMIN = "Admin",
+    MENTOR = "Mentor",
+    USER = "User",
+}
+
 interface IUser {
     name: string;
     email: string;
@@ -27,7 +33,7 @@ const UserSchema = new Schema<IUser>({
     description: { type: String, required: true },
     languages: { type: [String], required: true },
     googleId: {type: String, required: true},
-    role: { type: String, enum: Object.values(ENUMRole), required: true }, // Définir l'enum pour le schéma
+    role: { type: String, enum: Object.values(ENUMRole), required: false }, // Définir l'enum pour le schéma
 
     }
 );
