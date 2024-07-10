@@ -1,6 +1,5 @@
-import { Schema, model, Types } from 'mongoose';
+import { model, Schema, Types } from "mongoose";
 import { ENUMRole } from "../enum/role";
-
 
 interface IUser {
   name: string;
@@ -31,9 +30,9 @@ const UserSchema = new Schema<IUser>({
   description: { type: String, required: false },
   languages: { type: [String], required: false },
   googleId: { type: String, required: true },
-  role: { type: String, enum: Object.values(ENUMRole), required: false }, // Définir l'enum pour le schéma
-  createdAnnouncement: [{ type: Types.ObjectId, ref: 'announcement' }],
-    registredAnnouncement: [{ type: Types.ObjectId, ref: 'announcement' }],
+  role: { type: String, enum: Object.values(ENUMRole), required: true }, // Définir l'enum pour le schéma
+  createdAnnouncement: [{ type: Types.ObjectId, ref: "announcement" }],
+  registredAnnouncement: [{ type: Types.ObjectId, ref: "announcement" }],
 });
 
 const User = model<IUser>("user", UserSchema);

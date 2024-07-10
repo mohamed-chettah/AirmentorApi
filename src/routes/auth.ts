@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
-import { Context, Hono, Next } from "hono";
+import { Context, Hono } from "hono";
 import * as _jsonwebtoken from "jsonwebtoken";
 import { sign as signType, verify as verifyType } from "jsonwebtoken";
 const jsonwebtoken = <any>_jsonwebtoken;
@@ -7,8 +7,9 @@ const jsonwebtoken = <any>_jsonwebtoken;
 const sign: typeof signType = jsonwebtoken.default.sign;
 const verify: typeof verifyType = jsonwebtoken.default.verify;
 
-import { getCookie, setCookie } from "hono/cookie";
+import { setCookie } from "hono/cookie";
 import { appConfiguration } from "../env/env";
+import roleBasedMiddleware from "../middleware/middleware";
 import { User } from "../models/user";
 
 const app = new Hono().basePath("/auth");
@@ -18,27 +19,6 @@ const oauth2Client = new OAuth2Client(
   appConfiguration.OAUTH_CLIENT_SECRET,
   appConfiguration.OAUTH_REDIRECT_URI
 );
-
-const authMiddleware = async (c: Context, next: Next) => {
-  console.log("> Checking if user is authenticated");
-  const token = getCookie(c, "auth_token");
-  if (!token) {
-    console.log("! No token found");
-    return c.text("Unauthorized", 401);
-  }
-
-  try {
-    console.log("> Verifying validity of token");
-    const payload = verify(token, appConfiguration.JWT_SECRET);
-    c.set("jwtPayload", payload);
-    await next();
-  } catch (error) {
-    console.log("! Token is invalid");
-    return c.text("Invalid token", 401);
-  }
-};
-
-// const authMiddleware = verify(getCookie(c, "auth_token"), appConfiguration.JWT_SECRET);
 
 app.get("/google", (c: Context) => {
   console.log("> Initiating Google OAuth flow");
@@ -88,11 +68,13 @@ app.get("/google/callback", async (c: Context) => {
       console.log("> User already exists in MongoDB");
     } else {
       console.log("> Creating new user in MongoDB");
-      const newUser = new User({ googleId, email, name, profile_picture: picture });
+      const newUser = new User({ googleId, email, name, profile_picture: picture, role: "USER" });
       await newUser.save();
     }
 
-    const token = sign({ googleId, name }, appConfiguration.JWT_SECRET, { expiresIn: "7d" });
+    const role = userExists?.role || "USER";
+
+    const token = sign({ googleId, name, role }, appConfiguration.JWT_SECRET, { expiresIn: "7d" });
 
     setCookie(c, "auth_token", token, {
       httpOnly: true,
@@ -108,16 +90,10 @@ app.get("/google/callback", async (c: Context) => {
   }
 });
 
-app.get("/check", authMiddleware, (c: Context) => {
+app.get("/check", roleBasedMiddleware, (c: Context) => {
   console.log("> Checking token validity");
   const token = c.get("jwtPayload");
   return c.json({ valid: true, user: token });
-});
-
-app.get("/dashboard", authMiddleware, (c: Context) => {
-  console.log("> Loggin user out");
-  const token = c.get("jwtPayload");
-  return c.json({ message: "Welcome to your dashboard!", user: token });
 });
 
 app.get("/logout", (c: Context) => {
