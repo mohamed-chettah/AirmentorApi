@@ -7,7 +7,7 @@ const jsonwebtoken = <any>_jsonwebtoken;
 const sign: typeof signType = jsonwebtoken.default.sign;
 const verify: typeof verifyType = jsonwebtoken.default.verify;
 
-import { setCookie } from "hono/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 import { appConfiguration } from "../env/env";
 import roleBasedMiddleware from "../middleware/middleware";
 import { User } from "../models/user";
@@ -91,9 +91,15 @@ app.get("/google/callback", async (c: Context) => {
 });
 
 app.get("/check", roleBasedMiddleware, (c: Context) => {
-  console.log("> Checking token validity");
-  const token = c.get("jwtPayload");
-  return c.json({ valid: true, user: token });
+  // decode token from cookies and return user data
+  const token = getCookie(c, "auth_token");
+  if (!token) {
+    throw new Error("No token provided");
+  }
+
+  const user = verify(token, appConfiguration.JWT_SECRET);
+
+  return c.json({ valid: true, user: user });
 });
 
 app.get("/logout", (c: Context) => {

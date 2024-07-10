@@ -50,6 +50,8 @@ const roleBasedMiddleware = async (context: Context, next: Next) => {
 
     if (path.startsWith("/auth")) {
       if (method === "GET") {
+        console.log("passe gros");
+
         return next();
       } else if (role === "ADMIN" && ["POST", "PUT", "DELETE"].includes(method)) {
         return next();
