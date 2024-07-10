@@ -65,6 +65,27 @@ announcements.get("/category/:id", async (c: Context) => {
   }
 });
 
+announcements.get("/skills/:id", async (c: Context) => {
+  try {
+    const _id = c.req.param("id");
+
+    // Find skills in this category
+    const skills = await Skill.find({ _id });
+
+    console.log("skills", skills);
+
+    // Find announcements with these skills
+    const announcements = await Announcement.find({
+      skills: { $in: skills.map((s) => s._id) },
+    }).populate("skills createdBy");
+
+    return c.json({ announcements });
+  } catch (error) {
+    console.error("Error fetching announcements by category:", error);
+    return c.json({ message: "Internal server error" }, 500);
+  }
+});
+
 // en put, on écrase toutes les valeurs (y compris les tableaux)
 announcements.put("/:id", async (c) => {
   const _id = c.req.param("id");
