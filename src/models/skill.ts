@@ -8,7 +8,7 @@ interface ISkill {
 
 const SkillSchema = new Schema<ISkill>({
     title: { type: String, required: true },
-    categories: { type: Types.ObjectId, ref: 'skill' },
+    categories: { type: Types.ObjectId, ref: 'categorie' },
 });
 
 const Skill = model<ISkill>('skill', SkillSchema);
