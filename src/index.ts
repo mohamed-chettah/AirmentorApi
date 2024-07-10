@@ -1,13 +1,4 @@
-import { serve } from "@hono/node-server";
-import { Context, Hono, Next } from "hono";
-import { cors } from "hono/cors";
-import { createDatabaseConnection } from "./database";
-import { appConfiguration } from "./env/env";
-import announcements from "./routes/announcement";
-import auth from "./routes/auth";
-import reviews from "./routes/review";
-import users from "./routes/user";
-
+import { Context, Hono } from "hono";
 import * as _jsonwebtoken from "jsonwebtoken";
 import { sign as signType, verify as verifyType } from "jsonwebtoken";
 const jsonwebtoken = <any>_jsonwebtoken;
@@ -15,35 +6,22 @@ const jsonwebtoken = <any>_jsonwebtoken;
 const sign: typeof signType = jsonwebtoken.default.sign;
 const verify: typeof verifyType = jsonwebtoken.default.verify;
 
-import { getCookie } from "hono/cookie";
+import { serve } from "@hono/node-server";
+import { cors } from "hono/cors";
+import { createDatabaseConnection } from "./database";
+import { appConfiguration } from "./env/env";
+import roleBasedMiddleware from "./middleware/middleware";
+import announcements from "./routes/announcement";
+import auth from "./routes/auth";
 import categories from "./routes/categorie";
+import reviews from "./routes/review";
 import skills from "./routes/skill";
+import users from "./routes/user";
 
 const PORT = appConfiguration.SERVER_PORT;
 const BASE_ROUTE = appConfiguration.BASE_ROUTE;
 
 const app = new Hono();
-
-const authMiddleware = async (c: Context, next: Next) => {
-  console.log("> Checking if user is authenticated");
-  const token = getCookie(c, "auth_token");
-  if (!token) {
-    console.log("! No token found");
-    return c.text("Unauthorized", 401);
-  }
-
-  try {
-    console.log("> Verifying validity of token");
-    const payload = verify(token, appConfiguration.JWT_SECRET);
-    console.log("> Token is valid");
-
-    c.set("jwtPayload", payload);
-    await next();
-  } catch (error) {
-    console.log("! Token is invalid");
-    return c.text("Invalid token", 401);
-  }
-};
 
 // CORS middleware
 app.use(
@@ -64,7 +42,10 @@ app.use(
 
 await createDatabaseConnection();
 
-// Routes
+// Apply role-based middleware to all routes starting with /api
+app.use("/api/*", roleBasedMiddleware);
+
+// Apply the routes
 app.route(BASE_ROUTE, announcements);
 app.route(BASE_ROUTE, users);
 app.route(BASE_ROUTE, reviews);
