@@ -17,7 +17,7 @@ const AnnouncementSchema = new Schema<IAnnouncement>({
    picture: {type: String, required: true},
    skills: [{ type: Types.ObjectId, ref: 'skill' }],
    is_activate: {type: Boolean, required: true},
-    review: [{ type: Types.ObjectId, ref: 'review' }],
+   review: [{ type: Types.ObjectId, ref: 'review' }],
    createdBy: { type: Types.ObjectId, ref: 'user' },
 });
 

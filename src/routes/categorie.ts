@@ -29,6 +29,7 @@ categories.post('/', async (c) => {
         const saveCategorie = await newCategorie.save()
         return c.json(saveCategorie, 201)
     } catch (error: unknown) {
+        // @ts-ignore
         return c.json(error._message, 400)
     }
 })

@@ -28,6 +28,7 @@ skills.post('/', async (c) => {
         const saveSkill = await newSkill.save()
         return c.json(saveSkill, 201)
     } catch (error: unknown) {
+        // @ts-ignore
         return c.json(error._message, 400)
     }
 })

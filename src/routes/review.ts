@@ -27,6 +27,7 @@ reviews.post('/', async (c) => {
         const saveReview = await newReview.save()
         return c.json(saveReview, 201)
     } catch (error: unknown) {
+        // @ts-ignore
         return c.json(error._message, 400)
     }
 })
