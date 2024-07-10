@@ -94,7 +94,7 @@ app.get("/check", roleBasedMiddleware, (c: Context) => {
   // decode token from cookies and return user data
   const token = getCookie(c, "auth_token");
   if (!token) {
-    throw new Error("No token provided");
+    return c.json({ valid: false }, 401);
   }
 
   const user = verify(token, appConfiguration.JWT_SECRET);

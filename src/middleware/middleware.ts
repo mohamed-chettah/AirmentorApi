@@ -18,82 +18,66 @@ interface JwtPayload {
   picture: string;
 }
 
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+type Role = "USER" | "ADMIN";
+
+interface Rule {
+  path: string;
+  methods: HttpMethod[];
+  roles: Role[];
+}
+
+const rules: Rule[] = [
+  { path: "/api/categories", methods: ["GET"], roles: [] },
+  { path: "/api/categories", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
+  { path: "/api/skills", methods: ["GET"], roles: [] },
+  { path: "/api/skills", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
+  { path: "/api/announcements", methods: ["GET", "DELETE", "POST", "PUT", "PATCH"], roles: ["USER"] },
+  { path: "/api/announcements", methods: ["GET", "DELETE"], roles: ["ADMIN"] },
+  { path: "/api/users", methods: ["GET", "DELETE"], roles: ["USER", "ADMIN"] },
+  { path: "/auth", methods: ["GET"], roles: [] },
+  { path: "/auth", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
+];
+
 const roleBasedMiddleware = async (context: Context, next: Next) => {
-  // if route GET on /api/categories, /api/cateogries/:id allow without token
-  if (context.req.path.startsWith("/api/categories") && context.req.method === "GET") {
-    return next();
-  }
-
-  if (context.req.path.startsWith("/api/anouncements") && context.req.method === "GET") {
-    return next();
-  }
-
   console.log("> Role based middleware");
+
+  const path = context.req.path;
+  const method = context.req.method as HttpMethod;
+
+  // Check if the route is public (no roles required)
+  const publicRule = rules.find((rule) => path.startsWith(rule.path) && rule.methods.includes(method) && rule.roles.length === 0);
+
+  if (publicRule) {
+    return next();
+  }
+
   const token = getCookie(context, "auth_token");
   if (!token) {
     console.log("! No token provided");
     return context.json({ message: "Unauthorized" }, 401);
   }
 
-  console.log("> Token foudn: ", token);
+  console.log("> Token found: ", token);
   console.log("> Verifying token");
 
   try {
     const decoded = verify(token, appConfiguration.JWT_SECRET) as JwtPayload;
     console.log("> Token verified for a : ", decoded.role);
-    const { role } = decoded;
-    const path = context.req.path;
-    const method = context.req.method;
+    const role = decoded.role as Role;
 
     console.log("> Path, Method: ", path, method);
     console.log("> Handling rules");
 
-    if (path.startsWith("/auth")) {
-      if (method === "GET") {
-        console.log("passe gros");
+    const matchingRule = rules.find(
+      (rule) => path.startsWith(rule.path) && rule.methods.includes(method) && rule.roles.includes(role)
+    );
 
-        return next();
-      } else if (role === "ADMIN" && ["POST", "PUT", "DELETE"].includes(method)) {
-        return next();
-      }
+    if (matchingRule) {
+      return next();
     }
 
-    // Rules for /api/categories
-    if (path.startsWith("/api/categories")) {
-      if (method === "GET") {
-        return next();
-      } else if (role === "ADMIN" && ["POST", "PUT", "DELETE"].includes(method)) {
-        return next();
-      }
-    }
-
-    // Rules for /api/skills
-    else if (path.startsWith("/api/skills")) {
-      if (method === "GET") {
-        return next();
-      } else if (role === "ADMIN" && ["POST", "PUT", "DELETE"].includes(method)) {
-        return next();
-      }
-    }
-
-    // Rules for /api/announcements
-    else if (path.startsWith("/api/announcements")) {
-      if (role === "USER" && ["GET", "DELETE", "POST", "PUT", "PATCH"].includes(method)) {
-        return next();
-      } else if (role === "ADMIN" && ["GET", "DELETE"].includes(method)) {
-        return next();
-      }
-    }
-
-    // Rules for /api/users
-    else if (path.startsWith("/api/users")) {
-      if (["GET", "DELETE"].includes(method)) {
-        return next();
-      }
-    }
-
-    // If none of the conditions are met, return forbidden
-    console.log("! Forbidden for role and ressource : ", role, path, method);
+    console.log("! Forbidden for role and resource : ", role, path, method);
     return context.json({ message: "Forbidden" }, 403);
   } catch (error) {
     return context.json({ message: "Invalid token" }, 401);
