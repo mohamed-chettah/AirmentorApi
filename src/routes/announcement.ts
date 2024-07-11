@@ -167,6 +167,37 @@ announcements.get("/creator/:id", async (c) => {
 });
 
 
+// Search announcements by title
+announcements.get("/search/:q", async (c) => {
+    const searchQuery = c.req.param("q");
+    if (!searchQuery) {
+        return c.json({ msg: "Query parameter is missing" }, 400);
+    }
+
+    try {
+        const announcements = await Announcement.find(
+            {
+                title: { $regex: searchQuery, $options: "i" },
+                is_activate: true
+            },
+            {
+                title: 1, // Include title
+                _id: 1   // Include _id
+            }
+        );
+
+        const formattedResults = announcements.map(announcement => ({
+            title: announcement.title,
+            id: announcement._id
+        }));
+
+        return c.json(formattedResults);
+    } catch (error) {
+        console.error("Error searching announcements:", error);
+        return c.json({ message: "Internal server error" }, 500);
+    }
+});
+
 
 
 
