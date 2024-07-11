@@ -28,14 +28,14 @@ users.post("/", async (c) => {
 });
 
 // en put, on écrase toutes les valeurs (y compris les tableaux)
-users.put("/:id", async (c) => {
-  const _id = c.req.param("id");
+users.put("/:googleId", async (c) => {
+  const googleId = c.req.param("googleId");
   const body = await c.req.json();
   // on attrape l'id de la creations (_id)
   // on a besoin du body pour les champs à mettre à jour
   // on peut préparer notre query pour findOneAndUpdate
   const q = {
-    _id,
+    googleId,
   };
   const updateQuery = {
     ...body,
