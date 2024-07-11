@@ -71,9 +71,7 @@ announcements.get("/category/:id", async (c: Context) => {
       skills: { $in: skills.map((s) => s._id) },
     }).populate("skills createdBy");
 
-    console.log(announcements);
-
-    return c.json({ announcements });
+    return c.json(announcements);
   } catch (error) {
     console.error("Error fetching announcements by category:", error);
     return c.json({ message: "Internal server error" }, 500);
