@@ -41,6 +41,7 @@ const rules: Rule[] = [
   { path: "/auth", methods: ["GET"], roles: [] },
   { path: "/auth", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/messages", methods: ["GET"], roles: ["USER"] },
+  { path: "/api/conversations", methods: ["GET"], roles: ["USER"] },
 ];
 
 const roleBasedMiddleware = async (context: Context, next: Next) => {

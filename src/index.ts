@@ -3,11 +3,11 @@ import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import * as _jsonwebtoken from "jsonwebtoken";
 import { sign as signType, verify as verifyType } from "jsonwebtoken";
-import { WebSocketServer } from "ws";
+import { WebSocketServer} from "ws";
 import { createDatabaseConnection } from "./database";
 import { appConfiguration } from "./env/env";
 import roleBasedMiddleware from "./middleware/middleware";
-import { Message } from "./models/message";
+import {IMessage, Message} from "./models/message";
 import announcements from "./routes/announcement";
 import auth from "./routes/auth";
 import categories from "./routes/categorie";
@@ -15,6 +15,9 @@ import messages from "./routes/message";
 import reviews from "./routes/review";
 import skills from "./routes/skill";
 import users from "./routes/user";
+import {Conversation} from "./models/conversation";
+import conversations from "./routes/conversation";
+import {User} from "./models/user";
 
 const jsonwebtoken = <any>_jsonwebtoken;
 
@@ -51,6 +54,7 @@ app.route(BASE_ROUTE, reviews);
 app.route(BASE_ROUTE, skills);
 app.route(BASE_ROUTE, categories);
 app.route(BASE_ROUTE, messages);
+app.route(BASE_ROUTE, conversations);
 app.route("/", auth);
 
 app.get("/api/healthz", (c: Context) => {
@@ -77,23 +81,48 @@ const server = serve({
 // @ts-ignore
 const wss = new WebSocketServer({ server });
 
-wss.on("connection", function connection(ws: any) {
-  ws.on("error", console.error);
-  ws.on("message", async function message(data: any) {
-    //conver data buffer to object
-    let dataSave = JSON.parse(data);
-    const newMessage = new Message({
-      user: dataSave.user,
-      announcement: dataSave.announcement,
-      sender: dataSave.sender,
-      content: dataSave.content,
+wss.on('connection', (ws: any) => {
+    ws.on('error', console.error);
+
+    ws.on('message', async (data: any) => {
+        try {
+            // Convert data buffer to object
+            const dataSave = JSON.parse(data);
+            console.log('Received message:', dataSave);
+            // Find or create conversation
+            let conversation = await Conversation.findOne({
+                idAnnouncement: dataSave.announcement,
+                idUser: dataSave.user,
+                idCreator: dataSave.creator
+            });
+
+            if (!conversation) {
+                conversation = new Conversation({
+                    idAnnouncement: [dataSave.announcement],
+                    idUser: [dataSave.user],
+                    idCreator: [dataSave.creator],
+                    messages: []
+                });
+                await conversation.save();
+            }
+            let user = await User.findOne({_id: dataSave.user});
+            const newMessage = new Message({
+                user:  user,
+                content: dataSave.content,
+                timestamp: dataSave.timestamp
+            });
+
+            await newMessage.save();
+
+            // Add message to conversation
+            // @ts-ignore
+            conversation.messages.push(newMessage._id);
+            await conversation.save();
+
+            // Broadcast the message to all clients
+           ws.send(JSON.stringify(newMessage));
+        } catch (error) {
+            console.error('Error processing message:', error);
+        }
     });
-
-    await newMessage.save();
-
-    // Broadcast the message to all clients
-    if (ws.readyState === ws.OPEN) {
-      ws.send(data);
-    }
-  });
 });
