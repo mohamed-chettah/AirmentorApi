@@ -11,7 +11,7 @@ users.get("/", async (c) => {
 
 users.get("/:googleId", async (c) => {
   const googleId = c.req.param("googleId");
-  const user = await User.findOne({ googleId });
+  const user = await User.findOne({ googleId }).populate("reviews");
   return c.json(user);
 });
 
