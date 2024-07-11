@@ -13,6 +13,7 @@ interface IUser {
   description: string;
   languages: string[];
   googleId: string;
+  reviews: Types.ObjectId[];
   role: ENUMRole;
   createdAnnouncement: Types.ObjectId[];
   registredAnnouncement: Types.ObjectId[];
@@ -30,6 +31,7 @@ const UserSchema = new Schema<IUser>({
   description: { type: String, required: false },
   languages: { type: [String], required: false },
   googleId: { type: String, required: true },
+  reviews: [{ type: Types.ObjectId, ref: "review" }],
   role: { type: String, enum: Object.values(ENUMRole), required: true }, // Définir l'enum pour le schéma
   createdAnnouncement: [{ type: Types.ObjectId, ref: "announcement" }],
   registredAnnouncement: [{ type: Types.ObjectId, ref: "announcement" }],

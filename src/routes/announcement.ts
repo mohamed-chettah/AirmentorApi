@@ -4,6 +4,7 @@ import {isValidObjectId} from "mongoose";
 import {Announcement} from "../models/announcement";
 import {Categorie} from "../models/categorie";
 import {Skill} from "../models/skill";
+import { User } from "../models/user";
 
 const announcements = new Hono().basePath("/announcements");
 
@@ -16,8 +17,32 @@ announcements.get("/:id", async (c) => {
     const _id = c.req.param("id");
 
     if (isValidObjectId(_id)) {
-        const announcement = await Announcement.findOne({_id});
-        return c.json(announcement);
+        const announcement = await Announcement.findOne({_id}).populate("skills createdBy");
+
+    if (!announcement) {
+      return c.json({ msg: "Announcement not found" }, 404);
+    }
+
+    // Fetch the user's reviews
+    const user = await User.findOne({ googleId: announcement.createdBy.googleId }).populate({
+      path: "reviews",
+      populate: { path: "createdBy", select: "name profile_picture" },
+    });
+
+    if (!user) {
+        return c.json({ msg: "User not found" }, 404);
+    }
+
+    // Combine announcement data with user's reviews
+    const responseData = {
+      ...announcement.toObject(),
+      createdBy: {
+        ...announcement.createdBy.toObject(),
+        reviews: user.reviews,
+      },
+    };
+
+    return c.json(responseData);
     }
     return c.json({msg: "ObjectId malformed"}, 400);
 });

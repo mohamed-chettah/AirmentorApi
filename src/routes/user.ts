@@ -11,7 +11,7 @@ users.get("/", async (c) => {
 
 users.get("/:googleId", async (c) => {
   const googleId = c.req.param("googleId");
-  const user = await User.findOne({ googleId });
+  const user = await User.findOne({ googleId }).populate("reviews");
   return c.json(user);
 });
 
@@ -46,14 +46,14 @@ users.put("/:googleId", async (c) => {
   return c.json(tryToUpdate, 200);
 });
 // en patch, on va "append" les éléments passés dans le body
-users.patch("/:id", async (c) => {
-  const _id = c.req.param("id");
+users.patch("/:googleId", async (c) => {
+  const googleId = c.req.param("googleId");
   const body = await c.req.json();
   // on attrape l'id de la creations (_id)
   // on a besoin du body pour les champs à mettre à jour
   // on peut préparer notre query pour findOneAndUpdate
   const q = {
-    _id,
+    googleId,
   };
   const { name, email, phoneNumber, place, password, profile_picture, grade, credits, description, languages } = body;
 
@@ -75,9 +75,9 @@ users.patch("/:id", async (c) => {
   return c.json(tryToUpdate, 200);
 });
 
-users.delete("/:id", async (c) => {
-  const _id = c.req.param("id");
-  const tryToDelete = await User.deleteOne({ _id });
+users.delete("/:googleId", async (c) => {
+  const googleId = c.req.param("googleId");
+  const tryToDelete = await User.deleteOne({ googleId });
   const { deletedCount } = tryToDelete;
   if (deletedCount) {
     return c.json({ msg: "DELETE done" });
