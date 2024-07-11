@@ -38,9 +38,6 @@ categories.post('/', async (c) => {
 categories.put('/:id', async (c) => {
     const _id = c.req.param('id')
     const body = await c.req.json()
-    // on attrape l'id de la creations (_id)
-    // on a besoin du body pour les champs à mettre à jour
-    // on peut préparer notre query pour findOneAndUpdate
     const q = {
         _id
     }
@@ -48,8 +45,7 @@ categories.put('/:id', async (c) => {
         ...body
     }
     // par défaut il va faire un $set
-
-    const tryToUpdate = await Skill.findOneAndUpdate(q, updateQuery, { new: true })
+    const tryToUpdate = await Categorie.findOneAndUpdate(q, updateQuery, { new: true })
     return c.json(tryToUpdate, 200)
 
 })
