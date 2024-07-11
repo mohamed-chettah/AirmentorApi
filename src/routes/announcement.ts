@@ -16,7 +16,7 @@ announcements.get("/:id", async (c) => {
   const _id = c.req.param("id");
 
   if (isValidObjectId(_id)) {
-    const announcement = await Announcement.findOne({ _id });
+    const announcement = await Announcement.findOne({ _id }).populate("skills createdBy review");
     return c.json(announcement);
   }
   return c.json({ msg: "ObjectId malformed" }, 400);

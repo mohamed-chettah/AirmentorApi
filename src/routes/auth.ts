@@ -68,7 +68,18 @@ app.get("/google/callback", async (c: Context) => {
       console.log("> User already exists in MongoDB");
     } else {
       console.log("> Creating new user in MongoDB");
-      const newUser = new User({ googleId, email, name, profile_picture: picture, role: "USER", credits: 10});
+      const newUser = new User({
+        googleId,
+        email,
+        name,
+        profile_picture: picture,
+        role: "USER",
+        credits: 10,
+        place: "",
+        phoneNumber: "",
+        description: "",
+        grade: 5,
+      });
       await newUser.save();
     }
 
