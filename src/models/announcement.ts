@@ -8,6 +8,7 @@ interface IAnnouncement {
   skills: Types.ObjectId[];
   is_activate: boolean;
   createdBy: IUser;
+  registeredUsers: Types.ObjectId[];
 }
 
 const AnnouncementSchema = new Schema<IAnnouncement>({
@@ -17,6 +18,7 @@ const AnnouncementSchema = new Schema<IAnnouncement>({
   skills: [{ type: Types.ObjectId, ref: "skill" }],
   is_activate: { type: Boolean, required: true },
   createdBy: { type: Types.ObjectId, ref: "user" },
+  registeredUsers: [{ type: Types.ObjectId, ref: "user" }],
 });
 
 const Announcement = model<IAnnouncement>("announcement", AnnouncementSchema);

@@ -31,7 +31,7 @@ app.use(
   "*",
   cors({
     origin: "http://localhost:3000",
-    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Access-Control-Allow-Headers"],
     exposeHeaders: ["Content-Length", "X-Kuma-Revision"],
     maxAge: 600,

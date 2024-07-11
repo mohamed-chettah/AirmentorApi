@@ -19,7 +19,7 @@ interface JwtPayload {
   picture: string;
 }
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "PATCH";
 type Role = "USER" | "ADMIN";
 
 interface Rule {
@@ -37,7 +37,7 @@ const rules: Rule[] = [
   { path: "/api/announcements", methods: ["GET", "DELETE", "POST", "PUT", "PATCH"], roles: ["USER"] },
   { path: "/api/announcements", methods: ["GET", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/announcements", methods: ["GET"], roles: [] },
-  { path: "/api/users", methods: ["GET", "DELETE", "PUT"], roles: ["USER", "ADMIN"] },
+  { path: "/api/users", methods: ["GET", "DELETE", "PUT", "PATCH"], roles: ["USER", "ADMIN"] },
   { path: "/auth", methods: ["GET"], roles: [] },
   { path: "/auth", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/messages", methods: ["GET"], roles: ["USER"] },

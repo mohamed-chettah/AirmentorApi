@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 
+import { Announcement } from "../models/announcement";
 import { User } from "../models/user";
 
 const users = new Hono().basePath("/users");
 
 users.get("/", async (c) => {
-  const user = await User.find({});
+  const user = await User.find({}).populate("registredAnnouncement");
   return c.json(user);
 });
 
@@ -27,16 +28,46 @@ users.post("/", async (c) => {
   }
 });
 
+users.put("/enroll/:announcementId", async (c) => {
+  const announcementId = c.req.param("announcementId");
+  const { userId } = await c.req.json();
+
+  // Find the announcement
+  const announcement = await Announcement.findById(announcementId);
+  if (!announcement) {
+    return c.json({ msg: "Announcement not found" }, 404);
+  }
+
+  // Find the user
+  const user = await User.findById(userId);
+  if (!user) {
+    return c.json({ msg: "User not found" }, 404);
+  }
+
+  // Check if user is already registered
+  if (user.registredAnnouncement.includes(announcementId)) {
+    return c.json({ msg: "User already enrolled in this announcement" }, 400);
+  }
+
+  // Add announcement to user's registrations
+  user.registredAnnouncement.push(announcementId);
+  await user.save();
+
+  // Add user to announcement's registered users
+  announcement.registeredUsers.push(userId);
+  await announcement.save();
+
+  return c.json({ msg: "User successfully enrolled", user, announcement }, 201);
+});
+
 // en put, on écrase toutes les valeurs (y compris les tableaux)
 users.put("/:googleId", async (c) => {
   const googleId = c.req.param("googleId");
   const body = await c.req.json();
-  // on attrape l'id de la creations (_id)
-  // on a besoin du body pour les champs à mettre à jour
-  // on peut préparer notre query pour findOneAndUpdate
   const q = {
     googleId,
   };
+
   const updateQuery = {
     ...body,
   };
