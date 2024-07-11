@@ -46,8 +46,8 @@ skills.put("/:id", async (c) => {
     ...body,
   };
   // par défaut il va faire un $set
+  const tryToUpdate = await Skill.updateOne({"_id": _id}, updateQuery, { new: true });
 
-  const tryToUpdate = await Skill.findOneAndUpdate(q, updateQuery, { new: true });
   return c.json(tryToUpdate, 200);
 });
 // en patch, on va "append" les éléments passés dans le body
