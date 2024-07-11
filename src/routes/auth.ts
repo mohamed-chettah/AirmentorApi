@@ -34,6 +34,7 @@ app.get("/google", (c: Context) => {
 app.get("/google/callback", async (c: Context) => {
   console.log("> Handling Google OAuth callback");
   const code = c.req.query("code");
+  let isAlreadyAuthenticated = false;
 
   if (!code) {
     console.log("! No code provided");
@@ -66,8 +67,10 @@ app.get("/google/callback", async (c: Context) => {
 
     if (userExists) {
       console.log("> User already exists in MongoDB");
+      isAlreadyAuthenticated = true;
     } else {
       console.log("> Creating new user in MongoDB");
+      isAlreadyAuthenticated = false;
       const newUser = new User({
         googleId,
         email,
@@ -94,7 +97,11 @@ app.get("/google/callback", async (c: Context) => {
       maxAge: 60 * 60 * 24 * 7, // 1 week
     });
 
-    return c.redirect("http://localhost:3000/");
+    if (isAlreadyAuthenticated) {
+      return c.redirect("http://localhost:3000/");
+    }
+
+    return c.redirect("http://localhost:3000/mon-compte");
   } catch (error) {
     console.error("Error during authentication:", error);
     return c.json({ error: "Error during authentication" }, 500);
