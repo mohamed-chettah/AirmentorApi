@@ -34,14 +34,14 @@ const rules: Rule[] = [
   { path: "/api/skills", methods: ["GET"], roles: [] },
   { path: "/api/skills", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/reviews", methods: ["GET", "POST", "DELETE"], roles: ["USER"] },
-  { path: "/api/announcements", methods: ["GET", "DELETE", "POST", "PUT", "PATCH"], roles: ["USER"] },
+  { path: "/api/announcements", methods: ["GET", "DELETE", "POST", "PUT", "PATCH"], roles: ["USER", "ADMIN"] },
   { path: "/api/announcements", methods: ["GET", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/announcements", methods: ["GET"], roles: [] },
   { path: "/api/users", methods: ["GET", "DELETE", "PUT", "PATCH"], roles: ["USER", "ADMIN"] },
   { path: "/auth", methods: ["GET"], roles: [] },
   { path: "/auth", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
-  { path: "/api/messages", methods: ["GET"], roles: ["USER"] },
-  { path: "/api/conversations", methods: ["GET"], roles: ["USER"] },
+  { path: "/api/messages", methods: ["GET"], roles: ["USER", "ADMIN"] },
+  { path: "/api/conversations", methods: ["GET"], roles: ["USER", "ADMIN"] },
 ];
 
 const roleBasedMiddleware = async (context: Context, next: Next) => {
