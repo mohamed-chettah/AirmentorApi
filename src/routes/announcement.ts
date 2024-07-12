@@ -59,12 +59,8 @@ announcements.get("/category/:id", async (c: Context) => {
       return c.json({ message: "Category not found" }, 404);
     }
 
-    console.log("category", category);
-
     // Find skills in this category
     const skills = await Skill.find({ categories: categoryId });
-
-    console.log("skills", skills);
 
     // Find announcements with these skills
     const announcements = await Announcement.find({
@@ -85,8 +81,6 @@ announcements.get("/skills/:id", async (c: Context) => {
 
     // Find skills in this category
     const skills = await Skill.find({ _id });
-
-    console.log("skills", skills);
 
     // Find announcements with these skills
     const announcements = await Announcement.find({
