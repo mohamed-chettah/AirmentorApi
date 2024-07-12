@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import { Announcement } from "../models/announcement";
+import { Review } from "../models/review";
 import { User } from "../models/user";
 
 const users = new Hono().basePath("/users");
@@ -58,6 +59,34 @@ users.put("/enroll/:announcementId", async (c) => {
   await announcement.save();
 
   return c.json({ msg: "User successfully enrolled", user, announcement }, 201);
+});
+
+// add review for user
+users.put("/reviews/:googleId", async (c) => {
+  const googleId = c.req.param("googleId");
+  const { review } = await c.req.json();
+
+  // Find the user
+  const user = await User.findOne({ googleId });
+  if (!user) {
+    return c.json({ msg: "User not found" }, 404);
+  }
+
+  // if user already has a review for this user, return an error
+  const alreadyReviewed = user.reviews.some((r) => r.equals(review.reviewer));
+  if (alreadyReviewed) {
+    return c.json({ msg: "User already reviewed this user" }, 400);
+  }
+
+  // create review here
+  const newReview = new Review(review);
+  const saveReview = await newReview.save();
+
+  // Add review to user's reviews
+  user.reviews.push(saveReview._id);
+  await user.save();
+
+  return c.json({ msg: "Review successfully added", user }, 201);
 });
 
 // en put, on écrase toutes les valeurs (y compris les tableaux)
