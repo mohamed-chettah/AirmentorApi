@@ -34,7 +34,7 @@ const rules: Rule[] = [
   { path: "/api/skills", methods: ["GET"], roles: [] },
   { path: "/api/skills", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/reviews", methods: ["GET", "POST", "DELETE"], roles: ["USER"] },
-  { path: "/api/announcements", methods: ["GET", "DELETE", "POST", "PUT", "PATCH"], roles: ["USER"] },
+  { path: "/api/announcements", methods: ["GET", "DELETE", "POST", "PUT", "PATCH"], roles: ["USER", "ADMIN"] },
   { path: "/api/announcements", methods: ["GET", "DELETE"], roles: ["ADMIN"] },
   { path: "/api/announcements", methods: ["GET"], roles: [] },
   { path: "/api/users", methods: ["GET", "DELETE", "PUT", "PATCH"], roles: ["USER", "ADMIN"] },
