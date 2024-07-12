@@ -40,8 +40,8 @@ const rules: Rule[] = [
   { path: "/api/users", methods: ["GET", "DELETE", "PUT", "PATCH"], roles: ["USER", "ADMIN"] },
   { path: "/auth", methods: ["GET"], roles: [] },
   { path: "/auth", methods: ["POST", "PUT", "DELETE"], roles: ["ADMIN"] },
-  { path: "/api/messages", methods: ["GET"], roles: ["USER"] },
-  { path: "/api/conversations", methods: ["GET"], roles: ["USER"] },
+  { path: "/api/messages", methods: ["GET"], roles: ["USER", "ADMIN"] },
+  { path: "/api/conversations", methods: ["GET"], roles: ["USER", "ADMIN"] },
 ];
 
 const roleBasedMiddleware = async (context: Context, next: Next) => {
