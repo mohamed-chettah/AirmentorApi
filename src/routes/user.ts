@@ -3,16 +3,15 @@ import { Hono } from "hono";
 import { Announcement } from "../models/announcement";
 import { Review } from "../models/review";
 import { User } from "../models/user";
-
+import { rateLimiter } from "hono-rate-limiter";
 const users = new Hono().basePath("/users");
 
 const limiter = rateLimiter({
   windowMs: 5 * 60 * 1000, // 15 minutes
-  limit: 10, // 100 requests per window
+  limit: 10, 
   standardHeaders: 'draft-7',
   message: 'Too many requests, please try again later',
   keyGenerator: (c) => {
-    // Use IP address or another unique identifier
     return c.req.header('x-forwarded-for') || c.req.ip || 'unknown';
   }
 });
