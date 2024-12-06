@@ -6,12 +6,23 @@ import { User } from "../models/user";
 
 const users = new Hono().basePath("/users");
 
-users.get("/", async (c) => {
+const limiter = rateLimiter({
+  windowMs: 5 * 60 * 1000, // 15 minutes
+  limit: 10, // 100 requests per window
+  standardHeaders: 'draft-7',
+  message: 'Too many requests, please try again later',
+  keyGenerator: (c) => {
+    // Use IP address or another unique identifier
+    return c.req.header('x-forwarded-for') || c.req.ip || 'unknown';
+  }
+});
+
+users.get("/", limiter, async (c) => {
   const user = await User.find({}).populate("registredAnnouncement");
   return c.json(user);
 });
 
-users.get("/:googleId", async (c) => {
+users.get("/:googleId", limiter, async (c) => {
   const googleId = c.req.param("googleId");
   const user = await User.findOne({ googleId }).populate("reviews");
   return c.json(user);
